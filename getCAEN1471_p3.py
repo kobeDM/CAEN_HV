@@ -5,13 +5,34 @@ import sys
 import datetime
 import os
 
+def Com_search(bar=9600):
+    ser=''#bar=9600
+    serno=[] #成功したCOMポート番号を格納（Pythonで使う番号そのもの）
+    for i in range(10):	
+#    for i in range(10,-1,-1):	
+        port = '/dev/ttyUSB'+str(i)
+#        print(port)
+        try:
+            ser = serial.Serial(port, bar)
+#            print('Com_no=',i)	
+            serno.append(port)
+            ser.close()		
+        except:
+            None
+    #           print('Error:',ports)
+    return serno
+
+
+today = datetime.date.today()
+#print (today)
 todaydetail  =    datetime.datetime.today()
 #print(todaydetail)
-port = '/dev/ttyUSB0'
-#port = '/dev/ttyUSB1'
-caenN1470 = serial.Serial(port, 9600, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
+port=Com_search()
+print("USB port=",port[0])
+caenN1470 = serial.Serial(port[0], 9600, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
 print (caenN1470)
 time.sleep(1)
+
 
 
 # Sends a query and returns the value
@@ -67,34 +88,32 @@ cmd_get_voltage_ch3  = str.encode('$BD:00,CMD:MON,CH:3,PAR:VMON\r')
 cmd_get_current_ch3  = str.encode('$BD:00,CMD:MON,CH:3,PAR:IMON\r')
 
 reply = query_value(cmdstr, replystr)
-print ("sent: ", cmdstr)
-print ("read: ", reply)
-print ("")
+#print ("sent: ", cmdstr)
+print ("Module ID: ", reply)
+#print ("")
 
 #p = re.compile(r'([a-z]+)@([a-z]+)\.com')
 #print(p)
 
 
-today = datetime.date.today()
-print (today)
 #f = open('{0:%Y%m%d}'.format(today),'a')
 
 
-
 while True:
-
     tmp_today = datetime.date.today()
     if today != tmp_today:
         print (tmp_today)
         today = tmp_today
-    fna = '{0:%Y%m%d}'.format(today)
+    fna = "/home/msgc/status/"
+    fna += '{0:%Y%m%d}'.format(today)
     fna += "_3"
     print(fna)
 #    f = open('{0:%Y%m%d}'.format(today),'a')
     f = open(fna,'a')
-
     todaydetail  =    datetime.datetime.today()
     #print(todaydetail)
+    time.sleep(10)
+
 
     reply_status_ch0 = query_value(cmd_get_status_ch0, replystr)
     #print("ch0",end="")
@@ -144,3 +163,5 @@ while True:
     print ("%.0f %.3f %.0f %.3f %.0f %.3f %.0f %.3f" % (float(reply_voltage_ch0), float(reply_current_ch0),float(reply_voltage_ch1), float(reply_current_ch1),float(reply_voltage_ch2), float(reply_current_ch2),float(reply_voltage_ch3), float(reply_current_ch3)),file=f)
     f.close()
 #    time.sleep(1)
+
+
