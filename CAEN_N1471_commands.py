@@ -43,10 +43,10 @@ def query_value(querystr, replystr,dev):
         reply_undecoded = dev.read(100)
         #        print("reply:"+repr(reply_undecoded[0:3]))
         if len(reply_undecoded) ==0:
-            print("no response")
+#            print("no response")
             return -1
         if reply_undecoded[0:1] == b'\x9c':
-            print("something else")#not utf-8 decodable
+ #           print("something else")#not utf-8 decodable
             return -1
         reply = reply_undecoded.decode('utf-8')
         m = re.match(replystr, reply)
@@ -60,14 +60,12 @@ def query_value(querystr, replystr,dev):
 #search for a CAEN module
 def CAEN_search(ports):
     for i in range(len(ports)):
-        print(str(i)+" "+ports[i],end="\t\t\t")
+#        print(str(i)+" "+ports[i],end="\t\t\t")
         dev = serial.Serial(ports[i], bar, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
         reply = query_value(cmdstr, replystr,dev)
         if str(reply)[0:len(MODULE)] == MODULE :
-            print(MODULE+" found")
+  #          print(MODULE+" found")
             return ports[i]
-#        else:
-#            print("")
     return -1
 
 

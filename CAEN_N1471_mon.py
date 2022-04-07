@@ -72,8 +72,9 @@ if odb:
     
 print("### Search for "+MODULE+" ###")
 ports=port_search() #search for active ports
+print(ports)
 port=N1471.CAEN_search(ports)
-print(MODULE+" USB port="+port)
+print(str(MODULE)+" USB port="+str(port))
 dev = serial.Serial(port, N1471.bar, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
 
 today = datetime.date.today()
