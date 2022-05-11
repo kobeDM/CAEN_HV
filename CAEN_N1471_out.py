@@ -1,4 +1,4 @@
-#! /usr/bin/sudo  /usr/local/bin/python3
+#! /usr/bin/sudo  /usr/bin/python3
 import serial
 import time
 import re
