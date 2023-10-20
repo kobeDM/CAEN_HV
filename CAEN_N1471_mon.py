@@ -10,7 +10,7 @@ import argparse
 
 import CAEN_N1471_commands as N1471
 
-default_directory="/home/msgc/status"
+default_directory="/home/msgc/status/CAEN"
 default_filetag="_3"
 
 config_output = 'both'
