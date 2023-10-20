@@ -15,6 +15,9 @@ cmd_get_current  = '$BD:00,CMD:MON,CH:CHANNEL,PAR:IMON\r'
 
 cmd_set_voltage  = '$BD:00,CMD:SET,CH:CHANNEL,PAR:VSET,VAL:VALUE\r'
 
+cmd_set_on  = '$BD:00,CMD:SET,CH:CHANNEL,PAR:ON\r'
+cmd_set_off  = '$BD:00,CMD:SET,CH:CHANNEL,PAR:OFF\r'
+
 #cmd_get_status_ch0 = str.encode('$BD:00,CMD:MON,CH:0,PAR:STAT\r')
 #cmd_get_polarity_ch0 = str.encode('$BD:00,CMD:MON,CH:0,PAR:POL\r')
 #cmd_get_voltage_ch0  = str.encode('$BD:00,CMD:MON,CH:0,PAR:VMON\r')

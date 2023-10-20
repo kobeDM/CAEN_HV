@@ -24,20 +24,12 @@ def port_search():
     bar=N1471.bar
     ser=''#bar=9600
     serno=[] #成功したCOMポート番号を格納（Pythonで使う番号そのもの）
-<<<<<<< HEAD
     for i in range(32): 
-=======
-    for i in range(32):	
->>>>>>> 2ddcc9ace0c77ae89251c35f0d9b733e2d5dae00
         port = '/dev/ttyUSB'+str(i)
         try:
             ser = serial.Serial(port, bar)
             serno.append(port)
-<<<<<<< HEAD
             ser.close()         
-=======
-            ser.close()		
->>>>>>> 2ddcc9ace0c77ae89251c35f0d9b733e2d5dae00
         except:
             None
     return serno
@@ -82,10 +74,7 @@ args=parser.parse_args();
 ch=args.arg1
 V=args.arg2
 print("  Output "+str(V)+"V on channle "+str(ch))
-<<<<<<< HEAD
-=======
 
->>>>>>> 2ddcc9ace0c77ae89251c35f0d9b733e2d5dae00
 if ch<0 or  ch>3 :
     print("channel"+str(ch)+" is out of range. (must be in 0-3)")
     exit(1)
@@ -106,12 +95,8 @@ i=0
 #if type(port) == int :
 while type(port) == int :
     print(".",end=" ",flush=True)
-<<<<<<< HEAD
-    ports=port_search() #search for active ports    port=N1471.CAEN_search(ports)
-=======
     ports=port_search() #search for active ports
     port=N1471.CAEN_search(ports)
->>>>>>> 2ddcc9ace0c77ae89251c35f0d9b733e2d5dae00
     i=i+1
     if i > giveup:
         print("port not found")
@@ -129,26 +114,17 @@ monitor()
 
 #ch=0
 #print("ch:"+str(ch)+" output:"+str(V)+"V")
-cmd=str.encode(N1471.cmd_set_voltage.replace("CHANNEL",str(ch)).replace("VALUE",str(V)))
-<<<<<<< HEAD
+#switch on
+cmd=str.encode(N1471.cmd_set_on.replace("CHANNEL",str(ch)))
+print(cmd)
+replystr=str(N1471.query_value(cmd, N1471.replystr,dev)).replace("\r","")
 
-=======
->>>>>>> 2ddcc9ace0c77ae89251c35f0d9b733e2d5dae00
-#print(cmd)
+#set voltage
+cmd=str.encode(N1471.cmd_set_voltage.replace("CHANNEL",str(ch)).replace("VALUE",str(V)))
+print(cmd)
 replystr=str(N1471.query_value(cmd, N1471.replystr,dev)).replace("\r","")
 print(replystr)
 
 
 monitor()
 
-#print  (todaydetail.strftime("%Y/%m/%d/%H:%M:%S "),end="")
-
-  #  print("",file=f)
-  #  f.close()
-  #  time.sleep(1)
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> 2ddcc9ace0c77ae89251c35f0d9b733e2d5dae00

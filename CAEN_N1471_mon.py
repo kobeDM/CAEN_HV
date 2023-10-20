@@ -67,9 +67,6 @@ if odb:
     cursor.execute("USE " + sql_dbname)
     cursor.execute("CREATE TABLE IF NOT EXISTS  CAEN_N1471_1(time TIMESTAMP not null default CURRENT_TIMESTAMP,ch0_V FLOAT,ch0_I FLOAT,ch1_V FLOAT,ch1_I FLOAT,ch2_V FLOAT,ch2_I FLOAT,ch3_V FLOAT,ch3_I FLOAT)")
 
-
-    
-    
 print("### Search for "+MODULE+" ###")
 ports=port_search() #search for active ports
 print(ports)
