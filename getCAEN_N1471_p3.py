@@ -5,31 +5,45 @@ import sys
 import datetime
 import os
 
-def Com_search(bar=9600):
+import CAEN_N1471_commands as N1471
+MODULE="N1471"
+def port_search():
+    bar=N1471.bar
     ser=''#bar=9600
     serno=[] #成功したCOMポート番号を格納（Pythonで使う番号そのもの）
-    for i in range(10):	
-#    for i in range(10,-1,-1):	
+    for i in range(32):	
         port = '/dev/ttyUSB'+str(i)
-#        print(port)
         try:
             ser = serial.Serial(port, bar)
-#            print('Com_no=',i)	
             serno.append(port)
             ser.close()		
         except:
             None
-    #           print('Error:',ports)
     return serno
-
 
 today = datetime.date.today()
 #print (today)
 todaydetail  =    datetime.datetime.today()
 #print(todaydetail)
-port=Com_search()
-print("USB port=",port[0])
-caenN1470 = serial.Serial(port[0], 9600, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
+ports=port_search() #search for active ports
+port=N1471.CAEN_search(ports)
+print("  Search for "+MODULE,end=" ",flush=True)
+#port=port_search()
+#print("USB port=",port[0])
+giveup=100
+i=0
+#if type(port) == int :
+while type(port) == int :
+    print(".",end=" ",flush=True)
+    ports=port_search() #search for active ports
+    port=N1471.CAEN_search(ports)
+    i=i+1
+#    if i > giveup:
+#        print("port not found")
+#        exit(1)
+    time.sleep(1)
+#caenN1470 = serial.Serial(port[0], 9600, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
+caenN1470 = serial.Serial(port, 9600, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
 print (caenN1470)
 time.sleep(1)
 
@@ -40,14 +54,8 @@ def query_value(querystr, replystr):
     try:
         caenN1470.write(querystr)
         time.sleep(0.1)
-#        reply = caenN1470.read(100)
         reply = caenN1470.read(100).decode('utf-8')
-#        print("reply",replystr,reply)
         m = re.match(replystr, reply)
-#        m = re.match(replystr, "aho")
-#        m = re.match(re.compile(replystr), re.compile(reply))
-#        m=re.match("aho","aho")
-#        print(m)
         if (m):
             #print "error..."
             #return -1
