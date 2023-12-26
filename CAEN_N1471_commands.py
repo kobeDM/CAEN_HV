@@ -2,7 +2,8 @@ import serial
 import re
 
 MODULE="N1471"
-bar=9600
+#bar=9600
+bar=115200
 num_ch=4
 
 cmdstr = str.encode('$BD:00,CMD:MON,PAR:BDNAME\r')

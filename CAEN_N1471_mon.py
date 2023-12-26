@@ -1,4 +1,4 @@
-#!  /usr/bin/python3
+#! /usr/bin/sudo  /usr/bin/python3
 import serial
 import time
 import re
@@ -67,10 +67,24 @@ if odb:
     cursor.execute("USE " + sql_dbname)
     cursor.execute("CREATE TABLE IF NOT EXISTS  CAEN_N1471_1(time TIMESTAMP not null default CURRENT_TIMESTAMP,ch0_V FLOAT,ch0_I FLOAT,ch1_V FLOAT,ch1_I FLOAT,ch2_V FLOAT,ch2_I FLOAT,ch3_V FLOAT,ch3_I FLOAT)")
 
+    from influxdb import InfluxDBClient
+    client = InfluxDBClient( host = "10.37.0.214",
+                             port = "8086",
+                             username = "root",
+                             password = "root",
+                             database = "miraclue" )
+
 print("### Search for "+MODULE+" ###")
 ports=port_search() #search for active ports
 print(ports)
+#port=-1
 port=N1471.CAEN_search(ports)
+while type(port) == int:
+    #print(str(MODULE)+" USB port="+str(port))
+    print(".",end="")
+    #time.sleep(2)
+    port=N1471.CAEN_search(ports)
+
 print(str(MODULE)+" USB port="+str(port))
 dev = serial.Serial(port, N1471.bar, timeout=1, xonxoff=True, bytesize=serial.EIGHTBITS, stopbits=serial.STOPBITS_ONE, parity=serial.PARITY_NONE)
 
@@ -96,39 +110,79 @@ while True:
     voltages=[]
     for ch in range(N1471.num_ch):
         #read status
-        cmd=str.encode(N1471.cmd_get_status.replace("CHANNEL",str(ch)))
-        statuses.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
+        #cmd=str.encode(N1471.cmd_get_status.replace("CHANNEL",str(ch)))
+        #ret=N1471.query_value(cmd, N1471.replystr,dev)
+        #print(ret)
+        #statuses.append(ret.replace("\r",""))
+        #statuses.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
         #read polarity
         cmd=str.encode(N1471.cmd_get_polarity.replace("CHANNEL",str(ch)))
-        polarities.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
+        ret=N1471.query_value(cmd, N1471.replystr,dev)
+        #print(ret)
+        if type(ret) != int:
+            polarities.append(ret.replace("\r",""))
+        #polarities.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
         #read voltage
         cmd=str.encode(N1471.cmd_get_voltage.replace("CHANNEL",str(ch)))
-        voltages.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
+        ret=N1471.query_value(cmd, N1471.replystr,dev)
+        #print(ret)
+        #if ret.find("\r") > 0:
+        if type(ret) != int:
+
+            voltages.append(ret.replace("\r",""))
+        #voltages.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
         #read current
         cmd=str.encode(N1471.cmd_get_current.replace("CHANNEL",str(ch)))
-        currents.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
-
+        ret=N1471.query_value(cmd, N1471.replystr,dev)
+        #print(ret)
+        if type(ret) != int:
+            #if ret.find("\r") > 0:
+            currents.append(ret.replace("\r",""))
+        #currents.append(N1471.query_value(cmd, N1471.replystr,dev).replace("\r",""))
      
     print  (todaydetail.strftime("%Y/%m/%d/%H:%M:%S "),end="")
     print  (todaydetail.strftime("%Y/%m/%d/%H:%M:%S "),end="",file=f)
-    for ch in range(N1471.num_ch):
-        print("%.1f %.3f "  % (float((polarities[ch]+voltages[ch])),float(currents[ch])),end="")            
+    #print(len(voltages))
+    #print(N1471.num_ch)
+    if len(voltages)==N1471.num_ch and len(currents)==N1471.num_ch:
         if ocsv:   
-            print("%.1f %.3f "  % (float((polarities[ch]+voltages[ch])),float(currents[ch])),end="",file=f)
+            for ch in range(N1471.num_ch):
+                print("%.1f %.3f "  % (float((polarities[ch]+voltages[ch])),float(currents[ch])),end="")            
+                print("%.1f %.3f "  % (float((polarities[ch]+voltages[ch])),float(currents[ch])),end="",file=f)
+                #print(" > "+fout)            
+                #if ocsv:   
+            print("")
+            print("",file=f)
+        f.close()    
+        if odb:
+            date_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            utctime = datetime.datetime.utcnow()
+            cursor.execute("insert into CAEN_N1471_1(ch0_V,ch0_I,ch1_V,ch1_I,ch2_V,ch2_I,ch3_V,ch3_I) values(%s, %s, %s, %s, %s, %s, %s, %s)",(str(float((polarities[0]+voltages[0]))),currents[0],str(float((polarities[1]+voltages[1]))),currents[1],str(float((polarities[2]+voltages[2]))),currents[2],str(float((polarities[3]+voltages[3]))),currents[3]))
+            json_data = [
+                {
+                    'measurement' : "HV",
+                    'fields' : {
+                        'ch0_V' : float((polarities[0]+voltages[0])),
+                        'ch0_I' : float(currents[0]),
+                        'ch1_V' : float((polarities[1]+voltages[1])),
+                        'ch1_I' : float(currents[1]),
+                        'ch2_V' : float((polarities[2]+voltages[2])),
+                        'ch2_I' : float(currents[2]),
+                        'ch3_V' : float((polarities[3]+voltages[3])),
+                        'ch3_I' : float(currents[3])
+                    },
+                    'time' : utctime,
+                    'tags' : {
+                        'host' : "na14",
+                        'device' : "CAEN_N1471A"
+                    }
+                }
+            ]
 
-    print(" > "+fout)
-                
-    if ocsv:   
-        print("",file=f)
-        f.close()
+            result = client.write_points( json_data )
+
     
-    if odb:
-        date_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        cursor.execute("insert into CAEN_N1471_1(ch0_V,ch0_I,ch1_V,ch1_I,ch2_V,ch2_I,ch3_V,ch3_I) values(%s, %s, %s, %s, %s, %s, %s, %s)",(str(float((polarities[0]+voltages[0]))),currents[0],str(float((polarities[1]+voltages[1]))),currents[1],str(float((polarities[2]+voltages[2]))),currents[2],str(float((polarities[3]+voltages[3]))),currents[3]))
-
-
-    
-    time.sleep(1)
+    #time.sleep(1)
 
 
 
