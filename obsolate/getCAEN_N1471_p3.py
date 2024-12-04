@@ -53,8 +53,10 @@ time.sleep(1)
 def query_value(querystr, replystr):
     try:
         caenN1470.write(querystr)
+        print( querystr )
         time.sleep(0.1)
         reply = caenN1470.read(100).decode('utf-8')
+        print( reply )
         m = re.match(replystr, reply)
         if (m):
             #print "error..."
